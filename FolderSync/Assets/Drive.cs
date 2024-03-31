@@ -110,23 +110,24 @@ namespace GoogleDrive
                 var stream = new MemoryStream();
                 await request.DownloadAsync(stream);
                 System.IO.File.WriteAllBytes(localFilePath, stream.ToArray());
+                Debug.Log("Downloaded file: " + localFilePath);
             }
             catch (Exception e)
             {
                 Debug.LogError("[DOWNLOAD FILE]: " + e.Message);
             }
         }
-        public static async Task DownloadFiles(DriveService service, string folderId, string localFilePath)
+        public static async Task DownloadFiles(DriveService service, string folderId, string localFolderPath)
         {
             try
             {
                 var request = service.Files.List();
                 request.Q = $"'{folderId}' in parents"; // Filter by parent folder ID
-                request.Fields = "files(id)";
+                request.Fields = "files(id, name)";
                 var stream = new MemoryStream();
                 foreach (var file in request.Execute().Files)
                 {
-                    await DownloadFile(service, file.Id, localFilePath);
+                    await DownloadFile(service, file.Id, localFolderPath + "/" + file.Name);
                 }
             }
             catch (Exception e)
