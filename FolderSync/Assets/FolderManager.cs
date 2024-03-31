@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.IO;
 public class FolderData
 {
     public string folderPath;
@@ -55,22 +56,22 @@ public static class FolderManager
         }
     }
 
-    public static string SelectFolder()
-    {
-        string folderPath = UnityEditor.EditorUtility.OpenFolderPanel("Select Folder", "", "");
+    //public static string SelectFolder()
+    //{
+    //    //string folderPath = UnityEditor.EditorUtility.OpenFolderPanel("Select Folder", "", "");
 
-        if (!string.IsNullOrEmpty(folderPath))
-        {
-            Debug.Log("Selected folder: " + folderPath);
+    //    if (!string.IsNullOrEmpty(folderPath))
+    //    {
+    //        Debug.Log("Selected folder: " + folderPath);
 
-            return folderPath;
-            //FolderData folderData = new FolderData(folderPath, System.Guid.NewGuid().ToString());
-            //SaveFolderData(folderData);
-        }
-        else
-        {
-            Debug.Log("Folder selection cancelled.");
-            return null;
-        }
-    }
+    //        return folderPath;
+    //        //FolderData folderData = new FolderData(folderPath, System.Guid.NewGuid().ToString());
+    //        //SaveFolderData(folderData);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("Folder selection cancelled.");
+    //        return null;
+    //    }
+    //}
 }

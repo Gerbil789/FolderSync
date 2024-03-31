@@ -8,7 +8,15 @@ public class GameManager : MonoBehaviour
     {
         var localFolderPath = @"C:\Users\vojta\Documents\SyncFolder";
 
-        var service = await Drive.InitializeDriveService(Application.dataPath + "/credentials.json");
+        var credentials = await Drive.GetCredentials(Application.dataPath + "/credentials.json");
+        if(credentials == null)
+        {
+            Debug.LogError("Failed to get credentials");
+            return;
+        }
+
+
+        var service = await Drive.InitializeDriveService(credentials);
         if(service == null)
         {
             Debug.LogError("Failed to initialize drive service");
@@ -24,19 +32,12 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Folder ID: " + folderId);
 
+        var version = await Drive.GetFolderVersion(service, folderId);
+        Debug.Log("Folder version: " + version);
+
         //var url = @"https://drive.google.com/drive/folders/" + folderId;
         //Application.OpenURL(url);
 
-        await Drive.DownloadFiles(service, folderId, localFolderPath);
-    }
-
-
-    public void SelectFolder()
-    {
-        var localPath = FolderManager.SelectFolder();
-        if(localPath == null) return;
-
-        var folderData = new FolderData(localPath, System.Guid.NewGuid().ToString());
-        FolderManager.SaveFolderData(folderData);
+        //await Drive.DownloadFiles(service, folderId, localFolderPath);
     }
 }

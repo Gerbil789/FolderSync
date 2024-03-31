@@ -10,37 +10,49 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.WSA;
 
 namespace GoogleDrive
 {
+    
     //1082463448755-fuqfcrsf2hk2rermvjcda87uuhfbuvef.apps.googleusercontent.com
     public static class Drive
     {
-        public static Task<DriveService> InitializeDriveService(string credentialsFilePath)
+        private static readonly string[] Scopes = { DriveService.Scope.Drive, DriveService.Scope.DriveFile };
+        private  static readonly string credPath = "token.json";
+
+        public static async Task<UserCredential> GetCredentials(string credentialsFilePath)
         {
             try
             {
-                string[] Scopes = { DriveService.Scope.Drive, DriveService.Scope.DriveFile };
-
                 UserCredential credential;
                 using (var stream = new FileStream(credentialsFilePath, FileMode.Open, FileAccess.Read))
                 {
-                    string credPath = "token.json";
-                    credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                         GoogleClientSecrets.FromStream(stream).Secrets,
                         Scopes,
                         "user",
                         CancellationToken.None,
-                        new FileDataStore(credPath, false)).Result;
+                        new FileDataStore(credPath, false));
                 }
-
+                return credential;
+            }
+            catch (FileNotFoundException)
+            {
+                Debug.Log("Token file not found. User not logged in.");
+                return null;
+            }
+        }
+        public static Task<DriveService> InitializeDriveService(UserCredential credential)
+        {
+            try
+            {
                 DriveService service = new DriveService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential
                 });
 
                 return Task.FromResult(service);
-
             }
             catch (Exception e)
             {
@@ -211,6 +223,22 @@ namespace GoogleDrive
             catch (Exception e)
             {
                 Debug.LogError("[GET FOLDER ID]: " + e.Message);
+                return null;
+            }
+        }
+
+        public static async Task<long?> GetFolderVersion(DriveService service, string folderId)
+        {
+            try
+            {
+                var request = service.Files.Get(folderId);
+                request.Fields = "version";
+                var result = await request.ExecuteAsync();
+                return result?.Version;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("[GET FOLDER VERSION]: " + e.Message);
                 return null;
             }
         }
