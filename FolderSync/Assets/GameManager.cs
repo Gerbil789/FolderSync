@@ -1,21 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using GoogleDrive;
 
 public class GameManager : MonoBehaviour
 {
-    private void Start()
+    private async void Start()
     {
-        var folderData = FolderManager.LoadFolderData();
-        if(folderData != null)
+        var service = await Drive.InitializeDriveService(Application.dataPath + "/credentials.json");
+        if(service == null)
         {
-            Debug.Log("Loaded folder: " + folderData);
+            Debug.LogError("Failed to initialize drive service");
+            return;
         }
-        else
-        {
-            Debug.LogWarning("No folder data found");
-        }
+
+        var folderId = await Drive.GetFolderId(service, "Test");
+        Debug.Log("Folder ID: " + folderId);
+
     }
 
 
